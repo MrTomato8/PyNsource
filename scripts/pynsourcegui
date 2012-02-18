@@ -33,21 +33,39 @@ License: GPL 3 (free software).
 
 import wx
 import wx.lib.ogl as ogl
+import sys
+import os
+import argparse
+
 from pynsource import pynsourcegui
 
-def main():
-    application = pynsourcegui.BoaApp(0)
+
+def argparser():
+  rootparser = argparse.ArgumentParser(prog='haystack-reversers', description='Do a iterative pointer search to find structure.')
+  rootparser.add_argument('filename', type=argparse.FileType('r'), default=None, action='store', help='python file to parse.')
+  rootparser.set_defaults(func=mainloop)  
+  return rootparser
+
+def mainloop(opts):
+
+  application = pynsourcegui.BoaApp(0)
+  ogl.OGLInitialize()
+
+  if opts.filename is not None:
+    application.win.Go(files=[opts.filename.name])
+    application.win.redraw2()  #ADDED AT MAC PORT TIME
+    application._HackToForceTheScrollbarToShowUp()
+      
 #----------------------------------------------------------------------
-# This creates some pens and brushes that the OGL library uses.
+  application.MainLoop()
 
-    ogl.OGLInitialize()
-
-#----------------------------------------------------------------------
-    application.MainLoop()
-
-
+def main(argv):
+  parser = argparser()
+  opts = parser.parse_args(argv)
+  
+  opts.func(opts)  
+  
 if __name__ == '__main__':
-    main()
-
+  main(sys.argv[1:])
 
 

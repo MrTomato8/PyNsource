@@ -504,6 +504,9 @@ class HandleClassStaticAttrs(HandleComposites):
 
         classentry.AddAttribute(self.__staticattrname, attrtype)
         #print '       STATIC ATTR  ', self.__staticattrname
+        # TODO change for ctypes-specific handling code
+        # self.classentry.classesinheritsfrom
+        #for parentclass in self.classentry.classesinheritsfrom
 
 
 
