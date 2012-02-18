@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 """
  Make sure you delete the Build directory if you are
  reconfiguring which files are being distributed
@@ -8,7 +11,7 @@
 from setuptools import setup
 
 
-setup (name = "PyNsource",
+setup (name = "pynsource",
        version = "1.51",
        author = "Andy Bulka",
        author_email = "abulka@gmail.com",

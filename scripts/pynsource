@@ -19,7 +19,7 @@ A python source code scanner that generates
 import tokenize, token
 import pprint
 import os
-from pynsource import pynsource
+from pynsource import outputters
 
 def main():
     #test()
@@ -67,12 +67,12 @@ def main():
     if globbed:
         if optionExportToJava or optionExportToDelphi:
             if optionExportToJava:
-                u = pynsource.PythonToJava(globbed, treatmoduleasclass=optionModuleAsClass, verbose=optionVerbose)
+                u = outputters.PythonToJava(globbed, treatmoduleasclass=optionModuleAsClass, verbose=optionVerbose)
             else:
-                u = pynsource.PythonToDelphi(globbed, treatmoduleasclass=optionModuleAsClass, verbose=optionVerbose)
+                u = outputters.PythonToDelphi(globbed, treatmoduleasclass=optionModuleAsClass, verbose=optionVerbose)
             u.ExportTo(optionExportTo_outdir)
         else:
-            p = pynsource.PySourceAsText()
+            p = outputters.PySourceAsText()
             p.optionModuleAsClass = optionModuleAsClass
             p.verbose = optionVerbose
             for f in globbed:

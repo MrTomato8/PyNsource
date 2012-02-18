@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 """
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -33,203 +36,12 @@ WEB_PYNSOURCE_HOME_URL = "http://www.andypatterns.com/index.php/products/pynsour
 
 import wx
 import wx.lib.ogl as ogl
-#import ogl
 from wx import Frame
 import os,stat
 
-UML_STYLE_1 = 0
-WINDOW_SIZE = (640,480)
+from pynsource import config
+from pynsource import shapes
 
-class DiamondShape(ogl.PolygonShape):
-    def __init__(self, w=0.0, h=0.0):
-        ogl.PolygonShape.__init__(self)
-        if w == 0.0:
-            w = 60.0
-        if h == 0.0:
-            h = 60.0
-
-        points = [ (0.0,    -h/2.0),
-                   (w/2.0,  0.0),
-                   (0.0,    h/2.0),
-                   (-w/2.0, 0.0),
-                   ]
-
-        self.Create(points)
-
-
-#----------------------------------------------------------------------
-
-class RoundedRectangleShape(ogl.RectangleShape):
-    def __init__(self, w=0.0, h=0.0):
-        ogl.RectangleShape.__init__(self, w, h)
-        self.SetCornerRadius(-0.3)
-
-
-#----------------------------------------------------------------------
-
-class CompositeDivisionShape(ogl.CompositeShape):
-    def __init__(self, canvas):
-        ogl.CompositeShape.__init__(self)
-
-        self.SetCanvas(canvas)
-
-        # create a division in the composite
-        self.MakeContainer()
-
-        # add a shape to the original division
-        shape2 = ogl.RectangleShape(40, 60)
-        self.GetDivisions()[0].AddChild(shape2)
-
-        # now divide the division so we get 2
-        self.GetDivisions()[0].Divide(wx.HORIZONTAL)
-
-        # and add a shape to the second division (and move it to the
-        # centre of the division)
-        shape3 = ogl.CircleShape(40)
-        shape3.SetBrush(wx.CYAN_BRUSH)
-        self.GetDivisions()[1].AddChild(shape3)
-        shape3.SetX(self.GetDivisions()[1].GetX())
-
-        for division in self.GetDivisions():
-            division.SetSensitivityFilter(0)
-        
-#----------------------------------------------------------------------
-
-class CompositeShape(ogl.CompositeShape):
-    def __init__(self, canvas):
-        ogl.CompositeShape.__init__(self)
-
-        self.SetCanvas(canvas)
-
-        constraining_shape = ogl.RectangleShape(120, 100)
-        constrained_shape1 = ogl.CircleShape(50)
-        constrained_shape2 = ogl.RectangleShape(80, 20)
-
-        constraining_shape.SetBrush(wx.BLUE_BRUSH)
-        constrained_shape2.SetBrush(wx.RED_BRUSH)
-        
-        self.AddChild(constraining_shape)
-        self.AddChild(constrained_shape1)
-        self.AddChild(constrained_shape2)
-
-        constraint = ogl.Constraint(ogl.CONSTRAINT_MIDALIGNED_BOTTOM, constraining_shape, [constrained_shape1, constrained_shape2])
-        self.AddConstraint(constraint)
-        self.Recompute()
-
-        # If we don't do this, the shapes will be able to move on their
-        # own, instead of moving the composite
-        constraining_shape.SetDraggable(False)
-        constrained_shape1.SetDraggable(False)
-        constrained_shape2.SetDraggable(False)
-
-        # If we don't do this the shape will take all left-clicks for itself
-        constraining_shape.SetSensitivityFilter(0)
-
-        
-#----------------------------------------------------------------------
-
-class DividedShape(ogl.DividedShape):
-    def __init__(self, width, height, canvas):
-        ogl.DividedShape.__init__(self, width, height)
-        if UML_STYLE_1:
-            self.BuildRegions(canvas)
-
-    def BuildRegions(self, canvas):
-        region1 = ogl.ShapeRegion()
-        region1.SetText('DividedShape')
-        region1.SetProportions(0.0, 0.2)
-        region1.SetFormatMode(ogl.FORMAT_CENTRE_HORIZ)
-        self.AddRegion(region1)
-
-        region2 = ogl.ShapeRegion()
-        region2.SetText('This is Region number two.')
-        region2.SetProportions(0.0, 0.3)
-        region2.SetFormatMode(ogl.FORMAT_NONE)
-        #region2.SetFormatMode(ogl.FORMAT_CENTRE_HORIZ|ogl.FORMAT_CENTRE_VERT)
-        self.AddRegion(region2)
-
-        region3 = ogl.ShapeRegion()
-
-        region3.SetText("blah\nblah\nblah blah")
-        region3.SetProportions(0.0, 0.5)
-        region3.SetFormatMode(ogl.FORMAT_NONE)
-        self.AddRegion(region3)
-
-        # Andy Added
-        self.region1 = region1   # for external access...
-        self.region2 = region2   # for external access...
-        self.region3 = region3   # for external access...
-
-        self.SetRegionSizes()
-        self.ReformatRegions(canvas)
-
-
-    def FlushText(self):
-        # Taken from Boa
-        """This method retrieves the text from the shape
-        regions and draws it. There seems to be a problem that
-        the text is not normally drawn. """
-        canvas = self.GetCanvas()
-        dc = wx.ClientDC(canvas)
-        canvas.PrepareDC(dc)
-        count = 0
-        for region in self.GetRegions():
-            region.SetFormatMode(4)
-            self.FormatText(dc, region.GetText(), count)
-            count = count + 1
-
-    def ReformatRegions(self, canvas=None):
-        rnum = 0
-        if canvas is None:
-            canvas = self.GetCanvas()
-        dc = wx.ClientDC(canvas)  # used for measuring
-        for region in self.GetRegions():
-            text = region.GetText()
-            self.FormatText(dc, text, rnum)
-            rnum += 1
-
-
-    def OnSizingEndDragLeft(self, pt, x, y, keys, attch):
-        ogl.DividedShape.OnSizingEndDragLeft(self, pt, x, y, keys, attch)
-        self.SetRegionSizes()
-        self.ReformatRegions()
-        self.GetCanvas().Refresh()
-
-
-class DividedShapeSmall(DividedShape):
-    def __init__(self, width, height, canvas):
-        DividedShape.__init__(self, width, height, canvas)
-
-    def BuildRegions(self, canvas):
-        region1 = ogl.ShapeRegion()
-        region1.SetText('wxDividedShapeSmall')
-        region1.SetProportions(0.0, 0.9)
-        region1.SetFormatMode(ogl.FORMAT_CENTRE_HORIZ)
-        self.AddRegion(region1)
-
-        self.region1 = region1   # for external access...
-
-        self.SetRegionSizes()
-        self.ReformatRegions(canvas)
-
-    def ReformatRegions(self, canvas=None):
-        rnum = 0
-        if canvas is None:
-            canvas = self.GetCanvas()
-        dc = wx.ClientDC(canvas)  # used for measuring
-        for region in self.GetRegions():
-            text = region.GetText()
-            self.FormatText(dc, text, rnum)
-            rnum += 1
-
-    def OnSizingEndDragLeft(self, pt, x, y, keys, attch):
-        #self.base_OnSizingEndDragLeft(pt, x, y, keys, attch)
-        ogl.DividedShape.OnSizingEndDragLeft(self, pt, x, y, keys, attch)
-        self.SetRegionSizes()
-        self.ReformatRegions()
-        self.GetCanvas().Refresh()
-
-#----------------------------------------------------------------------
 
 class MyEvtHandler(ogl.ShapeEvtHandler):
     def __init__(self, log, frame):
@@ -406,15 +218,7 @@ class MyEvtHandler(ogl.ShapeEvtHandler):
 #----------------------------------------------------------------------
 import sys, glob
 
-#if not '.' in sys.path: sys.path.insert(0, '.')  # so find local pynsource package first.
-#import pprint
-#pprint.pprint(sys.path)
-#import pynsource
-#print pynsource
-#from pynsource.pynsource import PythonToJava, PySourceAsJava
-
-from pynsource import PythonToJava, PySourceAsJava
-
+from pynsource import outputters
 
 class TestWindow(ogl.ShapeCanvas):
     scrollStepX = 10
@@ -443,7 +247,7 @@ class TestWindow(ogl.ShapeCanvas):
         self.font1 = wx.Font(14, wx.MODERN, wx.NORMAL, wx.NORMAL, False)
         self.font2 = wx.Font(10, wx.MODERN, wx.NORMAL, wx.NORMAL, False)
 
-        #self.Go(path=r'C:\Documents and Settings\Administrator\My Documents\aa Python\pyNsource\Tests\PythonToJavaTest01\pythoninput01\*.py')
+        #self.Go(path=r'C:\Documents and Settings\Administrator\My Documents\aa Python\pyNsource\Tests\outputters.PythonToJavaTest01\pythoninput01\*.py')
 
         self.associations_generalisation = None
         self.associations_composition = None
@@ -496,7 +300,7 @@ class TestWindow(ogl.ShapeCanvas):
     def _Process(self, filepath):
         print '_Process', filepath
 
-        p = PySourceAsJava('c:\\try')
+        p = outputters.PySourceAsJava('c:\\try')
         p.optionModuleAsClass = 0
         p.verbose = 0
         p.Parse(filepath)
@@ -536,14 +340,14 @@ class TestWindow(ogl.ShapeCanvas):
                     #print 'ADDED Generalisation!!!!!!!!!!!!!!!'
 
 
-            if UML_STYLE_1:
+            if config.UML_STYLE_1:
                 # Build the UML shape
                 #
                 if classname not in self.classnametoshape:
                     #print 'BUILDING', classname, 'SEARCH', classname in self.classnametoshape, 'LEN', len(self.classnametoshape)
                     rRectBrush = wx.Brush("MEDIUM TURQUOISE", wx.SOLID)
                     dsBrush = wx.Brush("WHEAT", wx.SOLID)
-                    ds = self.MyAddShape(DividedShape(100, 150, self), 50, 145, wx.BLACK_PEN, dsBrush, '')
+                    ds = self.MyAddShape(shapes.DividedShape(100, 150, self), 50, 145, wx.BLACK_PEN, dsBrush, '')
                     ds.SetCentreResize(0)  # Specify whether the shape is to be resized from the centre (the centre stands still) or from the corner or side being dragged (the other corner or side stands still).
 
                     ds.region1.SetText(classname)
@@ -560,7 +364,7 @@ class TestWindow(ogl.ShapeCanvas):
                 # Build the UML shape
                 #
                 if classname not in self.classnametoshape:
-                    shape = DividedShape(width=100, height=150, canvas=self)
+                    shape = shapes.DividedShape(width=100, height=150, canvas=self)
 
                     pos = (50,50)
                     maxWidth = 10 #padding
@@ -615,8 +419,8 @@ class TestWindow(ogl.ShapeCanvas):
             for classname in classestocreate:
                 rRectBrush = wx.Brush("MEDIUM TURQUOISE", wx.SOLID)
                 dsBrush = wx.Brush("WHEAT", wx.SOLID)
-                ds = self.MyAddShape(DividedShapeSmall(100, 30, self), 50, 145, wx.BLACK_PEN, dsBrush, '')
-                if not UML_STYLE_1:
+                ds = self.MyAddShape(shapes.DividedShapeSmall(100, 30, self), 50, 145, wx.BLACK_PEN, dsBrush, '')
+                if not config.UML_STYLE_1:
                     ds.BuildRegions(canvas=self)  # build the one region
                 ds.SetCentreResize(0)  # Specify whether the shape is to be resized from the centre (the centre stands still) or from the corner or side being dragged (the other corner or side stands still).
                 ds.region1.SetText(classname)
@@ -637,7 +441,7 @@ class TestWindow(ogl.ShapeCanvas):
 
 
         if files:
-            u = PythonToJava(None, treatmoduleasclass=0, verbose=0)
+            u = outputters.PythonToJava(None, treatmoduleasclass=0, verbose=0)
             for f in files:
                 self._Process(f)    # Build a shape with all attrs and methods, and prepare association dict
 
@@ -648,7 +452,7 @@ class TestWindow(ogl.ShapeCanvas):
             globbed += files
             #print 'parsing', globbed
 
-            u = PythonToJava(globbed, treatmoduleasclass=0, verbose=0)
+            u = outputters.PythonToJava(globbed, treatmoduleasclass=0, verbose=0)
             for directory in globbed:
                 if '*' in directory or '.' in directory:
                     filepath = directory
@@ -1149,7 +953,7 @@ class BoaApp(wx.App):
         # its own top-level window
         if self.win:
             # so set the frame to a good size for showing stuff
-            self.frame.SetSize(WINDOW_SIZE)
+            self.frame.SetSize(config.WINDOW_SIZE)
             self.win.SetFocus()
 
         else:
@@ -1213,7 +1017,7 @@ class BoaApp(wx.App):
 
     def _HackToForceTheScrollbarToShowUp(self):
             """
-            sizeX,sizeY = WINDOW_SIZE
+            sizeX,sizeY = config.WINDOW_SIZE
             self.frame.SetSize((sizeX+1,sizeY+1))
             self.frame.SetSize((sizeX,sizeY))
             """
