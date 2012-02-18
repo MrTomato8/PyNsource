@@ -112,10 +112,11 @@ Version 1.3a
 Instructions for running the GUI
 
 - Run the standalone: pynsourcegui.exe
-- Run from source code: python pyNsourceGui.py
+- Run from source code: python pynsourcegui.py
+- Run from module: python -m pynsource.pynsourcegui.py
 
 If you used the distutil installer your files might be in e.g.
-  Python26\Lib\site-packages\pynsource\pyNsourceGui.py
+  Python26\Lib\site-packages\pynsource\pynsourcegui.py
 
 The GUI relies on wxpython http://www.wxpython.org
 
