@@ -1,0 +1,11 @@
+Path: .
+URL: http://pyidea.svn.sourceforge.net/svnroot/pyidea/pynsource/trunk
+Repository Root: http://pyidea.svn.sourceforge.net/svnroot/pyidea
+Repository UUID: 9f1cf5d1-1221-0410-9a5b-d261deae97bc
+Revision: 63
+Node Kind: directory
+Schedule: normal
+Last Changed Author: abulka
+Last Changed Rev: 63
+Last Changed Date: 2011-03-07 20:52:20 +1100 (Mon, 07 Mar 2011)
+
