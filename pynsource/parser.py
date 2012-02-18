@@ -22,6 +22,7 @@ import pprint
 import os
 
 from pynsource import config
+from pynsource import ctypesparse
 from pynsource.keywords import pythonbuiltinfunctions, javakeywords, delphikeywords
 
 
@@ -212,8 +213,9 @@ class HandleClasses(AndyBasicParseEngine):
         self.nexttokenisclass = 0
         if self.currclass not in self.classlist:
             self.classlist[self.currclass] = ClassEntry()
-        #print 'class', self.currclass
+        #print '*** class', self.currclass
         self.inbetweenClassAndFirstDef = 1
+        
 
     def On_newline(self):
         pass
@@ -494,6 +496,14 @@ class HandleClassStaticAttrs(HandleComposites):
             self.__AddAttrModuleLevel()
             self.__Clearwaiting()
 
+        if self.__staticattrname == '_fields_':
+            print 'CTYPES _fields_, activating ctypes fields parsing.', self.token, self.nexttoken
+            self.onlyParseForCtypesFields = True
+            self.waitingforequal = True
+            self.inbetweenClassAndFirstDef = False
+            self.__Clearwaiting()
+
+
     def __AddAttrModuleLevel(self):
         # Should re-use the logic in HandleClassAttributes for both parsing
         # (getting more info on multiplicity but not static - cos static not relevant?) and
@@ -510,9 +520,10 @@ class HandleClassStaticAttrs(HandleComposites):
 
 
 
-class HandleModuleLevelDefsAndAttrs(HandleClassStaticAttrs):
+class HandleModuleLevelDefsAndAttrs(HandleClassStaticAttrs, ctypesparse.HandleCtypesFields):
     def __init__(self):
         HandleClassStaticAttrs.__init__(self)
+        ctypesparse.HandleCtypesFields.__init__(self)
         self.moduleasclass = ''
         self.__Clearwaiting()
 
@@ -529,9 +540,18 @@ class HandleModuleLevelDefsAndAttrs(HandleClassStaticAttrs):
         HandleComposites.Parse(self, file)
 
     def On_meat(self):
-        HandleClassStaticAttrs.On_meat(self)
 
-        if self.isfreshline and self.tokentype == 1 and self.indentlevel == 0 and self.nexttoken == '=':
+        if self.onlyParseForCtypesFields:
+            ctypesparse.HandleCtypesFields.On_meat(self) # TODO       
+            #print 'parser onlyParseForCtypesFields', self.onlyParseForCtypesFields
+        else:
+            HandleClassStaticAttrs.On_meat(self)
+        
+        if self.onlyParseForCtypesFields:
+          return
+          #pass
+        
+        elif self.isfreshline and self.tokentype == 1 and self.indentlevel == 0 and self.nexttoken == '=':
             self.waitingforequalsymbolformoduleattr = 1
             self.modulelevelattrname = self.token
 
