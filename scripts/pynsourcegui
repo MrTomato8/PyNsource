@@ -52,7 +52,7 @@ def mainloop(opts):
   ogl.OGLInitialize()
 
   if opts.filename is not None:
-    application.win.Go(files=[opts.filename.name])
+    application.win.Go(files=[opts.filename.name  ])
     application.win.redraw2()  #ADDED AT MAC PORT TIME
     application._HackToForceTheScrollbarToShowUp()
       
