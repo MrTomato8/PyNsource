@@ -6,6 +6,6 @@ setup(
             "dll_excludes": ["MSVCP90.dll"]
         }
     },
-    console=['pyNsourceGui.py', 'pynsource.py']
+    console=['pynsourcegui.py', 'pynsource.py']
 )
 
