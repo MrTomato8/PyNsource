@@ -1409,27 +1409,8 @@ PyNSource Gui Help:
             self.win.ShutdownDemo()
         evt.Skip()
 
-def main():
-    application = BoaApp(0)
-#----------------------------------------------------------------------
-# This creates some pens and brushes that the OGL library uses.
-
-    ogl.OGLInitialize()
-
-#----------------------------------------------------------------------
-    application.MainLoop()
 
 
 if __name__ == '__main__':
-    main()
-
-
-# run.py is a wx demo module found in
-# C:\Program Files\wxPython2.8 Docs and Demos\demo
-"""
-if __name__ == '__main__':
-    import sys, os
-    import run
-    run.main(['', os.path.basename(sys.argv[0])] + sys.argv[1:])
-"""
+    pass
 

@@ -4,7 +4,10 @@
  as there may be old relics in there that get installed.
 """
 
-from distutils.core import setup
+#from distutils.core import setup
+from setuptools import setup
+
+
 setup (name = "PyNsource",
        version = "1.51",
        author = "Andy Bulka",
@@ -14,5 +17,6 @@ setup (name = "PyNsource",
        keywords = "UML modelling python reverse engineering",
        license = "GPL v3 Free as long as author is acknowledged and derivitave source is also open source.",
        packages=['pynsource'],
-       data_files=[('myextras', ['Readme.txt', 'rungui.bat'])]   
+       data_files=[('myextras', ['Readme.txt', 'rungui.bat'])],
+       scripts = ["scripts/pynsource", "scripts/pynsourcegui"],
        )

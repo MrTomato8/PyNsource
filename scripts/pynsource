@@ -1,0 +1,104 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+"""
+PyNSource
+Version 1.4c
+(c) Andy Bulka 2004-2006
+abulka@netspace.net.au
+http://www.atug.com/andypatterns/pynsource.htm
+
+A python source code scanner that generates
+ - UML pictures (as text)
+ - Java code (which can be imported into UML modelling tools.)
+ - UML diagrams in wxpython (see associated module pynsourcegui.py)
+
+
+"""
+
+import tokenize, token
+import pprint
+import os
+from pynsource import pynsource
+
+def main():
+    #test()
+    import sys, glob, getopt
+    SIMPLE = 0
+    globbed = []
+
+    optionVerbose = 0
+    optionModuleAsClass = 0
+    optionExportToJava = 0
+    optionExportToDelphi = 0
+    optionExportTo_outdir = ''
+
+    if SIMPLE:
+        params = sys.argv[1]
+        globbed = glob.glob(params)
+    else:
+        listofoptionvaluepairs, params = getopt.getopt(sys.argv[1:], "mvj:d:")
+        print listofoptionvaluepairs, params
+
+        def EnsurePathExists(outdir, outlanguagemsg):
+            assert outdir, 'Need to specify output folder for %s output - got %s.'%(outlanguagemsg, outdir)
+            if not os.path.exists(outdir):
+                raise RuntimeError, ('Output directory %s for %s file output does not exist.'%(outdir,outlanguagemsg))
+
+        for optionvaluepair in listofoptionvaluepairs:
+            if '-m' == optionvaluepair[0]:
+                optionModuleAsClass = 1
+            if '-v' == optionvaluepair[0]:
+                optionVerbose = 1
+            if optionvaluepair[0] in ('-j', '-d'):
+                if optionvaluepair[0] == '-j':
+                    optionExportToJava = 1
+                    language = 'Java'
+                else:
+                    optionExportToDelphi = 1
+                    language = 'Delphi'
+                optionExportTo_outdir = optionvaluepair[1]
+                EnsurePathExists(optionExportTo_outdir, language)
+
+        for param in params:
+            files = glob.glob(param)
+            globbed += files
+
+    if globbed:
+        if optionExportToJava or optionExportToDelphi:
+            if optionExportToJava:
+                u = pynsource.PythonToJava(globbed, treatmoduleasclass=optionModuleAsClass, verbose=optionVerbose)
+            else:
+                u = pynsource.PythonToDelphi(globbed, treatmoduleasclass=optionModuleAsClass, verbose=optionVerbose)
+            u.ExportTo(optionExportTo_outdir)
+        else:
+            p = pynsource.PySourceAsText()
+            p.optionModuleAsClass = optionModuleAsClass
+            p.verbose = optionVerbose
+            for f in globbed:
+                p.Parse(f)
+            print p
+    else:
+        print """Usage: pynsource -v -m -j outdir sourcedirorpythonfiles...
+
+-j generate java files, specify output folder for java files
+-v verbose
+-m create psuedo class for each module,
+   module attrs/defs etc treated as class attrs/defs
+
+BASIC EXAMPLES
+e.g. pynsource Test/testmodule01.py
+e.g. pynsource -m Test/testmodule03.py
+JAVA EXAMPLES
+e.g. pynsource -j c:/try c:/try
+e.g. pynsource -v -m -j c:/try c:/try
+e.g. pynsource -v -m -j c:/try c:/try/s*.py
+e.g. pynsource -j c:/try c:/try/s*.py Tests/u*.py
+e.g. pynsource -v -m -j c:/try c:/try/s*.py Tests/u*.py c:\cc\Devel\Client\w*.py
+DELPHI EXAMPLE
+e.g. pynsource -d c:/delphiouputdir c:/pythoninputdir/*.py
+"""
+
+if __name__ == '__main__':
+  main()
+
