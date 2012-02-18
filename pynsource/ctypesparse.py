@@ -30,7 +30,7 @@ class HandleCtypesFields():
     def __init__(self):
         self.attrslist = []
         HandleCtypesFields._Clearwaiting(self)
-        print self.onlyParseForCtypesFields
+        #print self.onlyParseForCtypesFields
 
     def On_newline(self):
         ''' ignore newlines  if [ is open ...'''
@@ -39,7 +39,7 @@ class HandleCtypesFields():
           HandleCtypesFields._Clearwaiting(self)
 
     def _Clearwaiting(self):
-        print 'ctypes CLEAR' 
+        #print 'ctypes CLEAR' 
         self.parsingctypes = False
         self.waitingforequal = False
         self.waitingforopen = False
@@ -78,7 +78,7 @@ class HandleCtypesFields():
 
         elif self.waitingforfield and self.token == ']': 
             HandleCtypesFields._Clearwaiting(self)
-            print 'STOP1'
+            #print 'STOP1'
 
         elif self.waitingforfieldname : #and self.nexttoken == ',':
             self.waitingforfieldname = False
@@ -113,29 +113,31 @@ class HandleCtypesFields():
             if self.token == ']':
               self.waitingfornextfield = False
               HandleCtypesFields._Clearwaiting(self)
-              print 'STOP2'
+              #print 'STOP2'
             elif self.token == ',':
               self.waitingfornextfield = False
               self.waitingforfield = True
             elif self.token in ['def', 'class']: # stop running errors
               HandleCtypesFields._Clearwaiting(self)
-              print 'STOP3'
+              #print 'STOP3'
 
             else:
               pass # ok
         else :     # stop running errors
-          print 'BAD TOKEN ', self.token, self.nexttoken
+          #print 'BAD TOKEN ', self.token, self.nexttoken
           HandleCtypesFields._Clearwaiting(self)
-          print 'STOP ERROR'
+          #print 'STOP ERROR'
           
               
 
     def _Add_Ctypes_Attribute(self, attrname, attrtype):
         #print self.classlist
         classentry = self.classlist[self.currclass]
-        attrtype = ['static', attrtype]
-
-        classentry.AddAttribute(attrname, attrtype)
+        #attrtype = ['static', attrtype]
+        #attrtype = ['normal', attrtype]
+        #classentry.AddAttribute(attrname, attrtype)
+        
+        classentry.AddAttribute(attrtype, ['normal'])
         #print '       CTYPES ATTR  ', attrname, attrtype
 
 

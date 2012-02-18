@@ -497,7 +497,7 @@ class HandleClassStaticAttrs(HandleComposites):
             self.__Clearwaiting()
 
         if self.__staticattrname == '_fields_':
-            print 'CTYPES _fields_, activating ctypes fields parsing.', self.token, self.nexttoken
+            #print 'CTYPES _fields_, activating ctypes fields parsing.', self.token, self.nexttoken
             self.onlyParseForCtypesFields = True
             self.waitingforequal = True
             self.inbetweenClassAndFirstDef = False
